@@ -145,4 +145,16 @@ router.post("/my-collection", async (req, res) => {
   }
 });
 
+// API TO GET USER'S MY COLLECTIONS
+router.get("/my-collection/:email", async (req, res) => {
+  try {
+    const list = await favorites()
+      .find({ userEmail: req.params.email })
+      .toArray();
+    res.status(200).json(list);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
