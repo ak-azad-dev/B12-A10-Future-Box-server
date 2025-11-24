@@ -69,4 +69,29 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+// 4. API TO UPDATE MOVIE DETAILS
+router.put("/update/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!ObjectId.isValid(id))
+      return res.status(400).json({ message: "Invalid ID" });
+
+    const updateInfo = {
+      $set: req.body,
+    };
+
+    const result = await movies().updateOne(
+      { _id: new ObjectId(id) },
+      updateInfo
+    );
+
+    if (result.matchedCount === 0)
+      return res.status(404).json({ message: "Movie not found" });
+
+    res.status(200).json({ success: true, message: "Movie updated" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
