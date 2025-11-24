@@ -39,7 +39,7 @@ router.get("/", async (req, res) => {
       query.title = { $regex: search, $options: "i" };
     }
 
-    // 3. Execute Query
+    // Execute Query
     const result = await movies().find(query).toArray();
 
     res.status(200).json({
@@ -47,6 +47,23 @@ router.get("/", async (req, res) => {
       count: result.length,
       data: result,
     });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 3. API TO GET SINGLE MOVIE DETAILS
+router.get("/:id", async (req, res) => {
+  try {
+    const id = req.params.id;
+    if (!ObjectId.isValid(id))
+      return res.status(400).json({ message: "Invalid ID" });
+
+    const movie = await movies().findOne({ _id: new ObjectId(id) });
+
+    if (!movie) return res.status(404).json({ message: "Movie not found" });
+
+    res.status(200).json(movie);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
