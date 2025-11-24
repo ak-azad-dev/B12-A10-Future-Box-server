@@ -112,4 +112,37 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// 6. API TO ADD TO MY COLLECTIONS
+router.post("/my-collection", async (req, res) => {
+  try {
+    const { movieId, userEmail, notes } = req.body;
+
+    // Check if movie exists
+    const movie = await movies().findOne({ _id: new ObjectId(movieId) });
+    if (!movie)
+      return res.status(404).json({ message: "Movie does not exist" });
+
+    const favoriteItem = {
+      userEmail,
+      movieId: new ObjectId(movieId),
+      movieTitle: movie.title,
+      notes: notes || "",
+      addedAt: new Date(),
+    };
+
+    // Prevent duplicates
+    const exists = await favorites().findOne({
+      userEmail,
+      movieId: new ObjectId(movieId),
+    });
+    if (exists)
+      return res.status(400).json({ message: "Already in favorites" });
+
+    const result = await favorites().insertOne(favoriteItem);
+    res.status(201).json({ success: true, message: "Added to favorites" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
