@@ -28,4 +28,28 @@ router.post("/add", async (req, res) => {
   }
 });
 
+// 2. API TO GET ALL MOVIES
+router.get("/", async (req, res) => {
+  try {
+    const { search, genre, sort } = req.query;
+    let query = {};
+
+    // Search logic
+    if (search) {
+      query.title = { $regex: search, $options: "i" };
+    }
+
+    // 3. Execute Query
+    const result = await movies().find(query).toArray();
+
+    res.status(200).json({
+      success: true,
+      count: result.length,
+      data: result,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
