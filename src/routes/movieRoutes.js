@@ -6,7 +6,7 @@ const router = express.Router();
 
 // Helper to get collections easily
 const movies = () => getDB().collection("movies");
-const favorites = () => getDB().collection("favorites"); // For personal collections
+const favorites = () => getDB().collection("favorites");
 
 // 1. API TO CREATE MOVIE
 router.post("/add", async (req, res) => {
@@ -28,18 +28,32 @@ router.post("/add", async (req, res) => {
   }
 });
 
-// 2. API TO GET ALL MOVIES
+// SIMPLE: Get all movies with basic filters
 router.get("/", async (req, res) => {
   try {
-    const { search, genre, sort } = req.query;
+    const { search, genres, minRating, maxRating } = req.query;
+
     let query = {};
 
-    // Search logic
+    // SEARCH by title
     if (search) {
       query.title = { $regex: search, $options: "i" };
     }
 
-    // Execute Query
+    // MULTIPLE GENRES
+    if (genres) {
+      const genreArray = genres.split(",").map(g => g.trim());
+      query.genre = { $in: genreArray };
+    }
+
+    // RATING RANGE
+    if (minRating || maxRating) {
+      query.rating = {};
+      if (minRating) query.rating.$gte = Number(minRating);
+      if (maxRating) query.rating.$lte = Number(maxRating);
+    }
+
+    // RUN QUERY
     const result = await movies().find(query).toArray();
 
     res.status(200).json({
@@ -47,10 +61,12 @@ router.get("/", async (req, res) => {
       count: result.length,
       data: result,
     });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // 3. API TO GET SINGLE MOVIE DETAILS
 router.get("/:id", async (req, res) => {
