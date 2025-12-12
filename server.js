@@ -1,11 +1,15 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const { connectDB } = require("./config/db");
-const movieRoutes = require("./routes/movieRoutes");
+const { connectDB } = require("./src/config/db");
+const movieRoutes = require("./src/routes/movieRoutes");
 const admin = require("firebase-admin");
 
-const serviceAccount = require("../movie-master-pro-firebase-admin-key.json");
+const decoded = Buffer.from(
+  process.env.FIREBASE_SERVICE_ACCOUNT_KEY,
+  "base64"
+).toString("utf8");
+const serviceAccount = JSON.parse(decoded);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),

@@ -41,3 +41,4 @@ build/
 
 # Firebase admin key
 movie-master-pro-firebase-admin-key.json
+.vercel
