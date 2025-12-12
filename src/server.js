@@ -3,6 +3,13 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const { connectDB } = require("./config/db");
 const movieRoutes = require("./routes/movieRoutes");
+const admin = require("firebase-admin");
+
+const serviceAccount = require("../movie-master-pro-firebase-admin-key.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
 
 dotenv.config();
 

@@ -38,3 +38,6 @@ build/
 # package-lock.json
 # yarn.lock
 # pnpm-lock.yaml
+
+# Firebase admin key
+movie-master-pro-firebase-admin-key.json

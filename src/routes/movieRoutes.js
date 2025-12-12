@@ -4,12 +4,29 @@ const { getDB } = require("../config/db");
 
 const router = express.Router();
 
+// Middleware to verify Firebase Token
+const verifyFireBaseToken = async (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const idToken = authHeader.split(" ")[1];
+    try {
+      const decodedToken = await admin.auth().verifyIdToken(idToken);
+      req.user = decodedToken;
+      next();
+    } catch (error) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+  } else {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
 // Helper to get collections easily
 const movies = () => getDB().collection("movies");
 const favorites = () => getDB().collection("favorites");
 
 // 1. API TO CREATE MOVIE
-router.post("/add", async (req, res) => {
+router.post("/add", verifyFireBaseToken, async (req, res) => {
   try {
     const newMovie = req.body;
 
@@ -86,7 +103,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // 4. API TO UPDATE MOVIE DETAILS
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id", verifyFireBaseToken, async (req, res) => {
   try {
     const id = req.params.id;
     if (!ObjectId.isValid(id))
@@ -111,7 +128,7 @@ router.put("/update/:id", async (req, res) => {
 });
 
 // 5. API TO DELETE MOVIE
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyFireBaseToken, async (req, res) => {
   try {
     const id = req.params.id;
     if (!ObjectId.isValid(id))
@@ -129,7 +146,7 @@ router.delete("/:id", async (req, res) => {
 });
 
 // 6. API TO ADD TO MY COLLECTIONS
-router.post("/my-collection", async (req, res) => {
+router.post("/my-collection", verifyFireBaseToken, async (req, res) => {
   try {
     const { movieId, userEmail, notes } = req.body;
 
